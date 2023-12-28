@@ -11,18 +11,30 @@
       rel="stylesheet"
     />
     <style type="text/css">
-      html {
+      html, body {
         background: #f8f9fa;
-      }
-      body {
+        height: 100%;
         margin: 0;
+        
+        font-family: IBM Plex Mono, monospace, sans-serif;
         line-height: 1.8;
       }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
       main {
-        font-family: IBM Plex Mono, monospace, sans-serif;
+        flex: 1;
+        max-width: 800px;
         margin: 0 auto;
         padding: 0 20px 20px;
-        max-width: 800px;
+      }
+      footer {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
       }
       h1 {
         line-height: 1.5;
@@ -80,5 +92,6 @@
         and full time student pursuing a M.Sc. in Cybernetics and Robotics at NTNU.
       </p>
       </main>
+      <footer>4889924</footer>
   </body>
 </html>
