@@ -1,10 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Get the first 7 characters of the latest commit hash
 commit_hash=$(git rev-parse --short HEAD)
 
-# Print the first 7 characters of the commit hash
-sed -i "s|<footer>commit here</footer>|<footer>$commit_hash</footer>|" exported/index.html
+sed -i 's/\$commit\$/'"$commit_hash"'/' exported/index.html
 
 # Dotfiles
 GET=exported/get-dotfiles.sh
