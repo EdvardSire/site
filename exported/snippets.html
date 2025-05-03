@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Entries</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            margin: 5px;
+        }
+        .entry {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CRUD Entries</h1>
+
+    <div>
+        <h2>Create New Entry</h2>
+        <input type="text" id="title" placeholder="Title">
+        <input type="text" id="content" placeholder="Content">
+        <button onclick="createEntry()">Create Entry</button>
+    </div>
+
+    <div>
+        <h2>Entries</h2>
+        <div id="entries"></div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const auth_key = params.get("auth");
+        const apiUrl = "https://snippets.edvardsire.workers.dev/";
+
+        if (!auth_key) {
+            alert("Missing auth key in URL!");
+        }
+
+        async function fetchEntries() {
+            const response = await fetch(`${apiUrl}?auth=${auth_key}`, { method: 'GET' });
+            const data = await response.json();
+            const entriesContainer = document.getElementById("entries");
+            entriesContainer.innerHTML = '';
+
+            for (const timestamp in data) {
+                const entry = data[timestamp];
+                const entryDiv = document.createElement('div');
+                entryDiv.classList.add('entry');
+                entryDiv.innerHTML = `
+                    <strong>${entry.title}</strong>: ${entry.content} <br>
+                    <button onclick="updateEntry(${timestamp}, '${entry.title}', '${entry.content}')">Update</button>
+                    <button onclick="deleteEntry(${timestamp})">Delete</button>
+                `;
+                entriesContainer.appendChild(entryDiv);
+            }
+        }
+
+        async function createEntry() {
+            const title = document.getElementById("title").value;
+            const content = document.getElementById("content").value;
+
+            const response = await fetch(`${apiUrl}?auth=${auth_key}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': auth_key
+                },
+                body: JSON.stringify({ title, content, auth: auth_key })
+            });
+
+            if (response.ok) {
+                fetchEntries();
+            } else {
+                alert("Error creating entry.");
+            }
+        }
+
+        async function updateEntry(timestamp, oldTitle, oldContent) {
+            const newTitle = prompt("Update title:", oldTitle);
+            const newContent = prompt("Update content:", oldContent);
+
+            if (newTitle && newContent) {
+                const response = await fetch(`${apiUrl}?auth=${auth_key}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': auth_key
+                    },
+                    body: JSON.stringify({ title: newTitle, content: newContent, timestamp, auth: auth_key })
+                });
+
+                if (response.ok) {
+                    fetchEntries();
+                } else {
+                    alert("Error updating entry.");
+                }
+            }
+        }
+
+        async function deleteEntry(timestamp) {
+            const response = await fetch(`${apiUrl}?auth=${auth_key}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': auth_key
+                },
+                body: JSON.stringify({ timestamp, auth: auth_key })
+            });
+
+            if (response.ok) {
+                fetchEntries();
+            } else {
+                alert("Error deleting entry.");
+            }
+        }
+
+        fetchEntries();
+    </script>
+</body>
+</html>

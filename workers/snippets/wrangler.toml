@@ -1,0 +1,11 @@
+name = "snippets"
+main = "index.js"
+account_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+compatibility_date = "2024-05-03"
+
+kv_namespaces = [
+  { binding = "KV", id = "36d0315fb29c4357b35287a5c47df6bb" }
+]
+
+[vars]
+AUTH = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
