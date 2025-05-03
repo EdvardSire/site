@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Code Snippets</title>
+  <style>
+    body { font-family: sans-serif; padding: 1em; max-width: 600px; margin: auto; }
+    textarea, input { width: 100%; margin: 0.5em 0; }
+    button { padding: 0.5em 1em; margin-top: 0.5em; }
+  </style>
+</head>
+<body>
+  <h2>GitHub Gist Snippet Manager</h2>  <label>Snippet Name (e.g. "my_snippet.js")</label>
+  <input id="filename" placeholder="filename.js" />  <label>Content</label>
+  <textarea id="content" rows="10" placeholder="Your code here..."></textarea>  <button onclick="createGist()">Save Snippet</button>
+  <button onclick="listGists()">Load Snippets</button>  <div id="output"></div>  <script>
+    const token = new URLSearchParams(window.location.search).get('token');
+    if (!token) alert("Missing ?token=YOUR_GITHUB_PAT in URL");    async function createGist() {
+      const filename = document.getElementById("filename").value;
+      const content = document.getElementById("content").value;
+      const body = {
+        description: "Saved via Snippet Manager",
+        public: false,
+        files: { [filename]: { content } }
+      };      const res = await fetch("https://api.github.com/gists", {
+        method: "POST",
+        headers: {
+          "Authorization": "token " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });      const data = await res.json();
+      document.getElementById("output").innerHTML =
+        `Saved: <a href="${data.html_url}" target="_blank">${data.html_url}</a>`;
+    }      async function listGists() {
+  const res = await fetch("https://api.github.com/gists", {
+    headers: { "Authorization": "token " + token }
+  });  const gists = await res.json();
+  const container = document.getElementById("output");
+  container.innerHTML = "";  for (const g of gists) {
+    const [fname, file] = Object.entries(g.files)[0];
+    const rawRes = await fetch(file.raw_url);
+    const rawContent = await rawRes.text();    const snippetBox = document.createElement("div");
+    snippetBox.style = "margin-bottom:1em; padding:1em; border:1px solid #ccc; background:#f9f9f9; white-space:pre-wrap;";
+    snippetBox.innerHTML = `<b>${fname}</b><pre>${rawContent.replace(/[<>&]/g, c => (
+      { '<':'&lt;', '>':'&gt;', '&':'&amp;' }[c]
+    ))}</pre>`;
+    container.appendChild(snippetBox);
+  }
+}
+  </script>
+</body>
+</html>
