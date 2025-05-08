@@ -33,8 +33,9 @@
             const entriesContainer = document.getElementById("entries");
             entriesContainer.innerHTML = '';
 
-            for (const timestamp in data) {
-                const entry = data[timestamp];
+            const entriesArray = Object.entries(data);
+            entriesArray.sort((a, b) => b[0] - a[0]);
+            entriesArray.forEach(([timestamp, entry]) => {
                 const entryDiv = document.createElement('div');
                 entryDiv.classList.add('entry');
                 entryDiv.id = timestamp;
@@ -47,7 +48,7 @@
                         { '<':'&lt;', '>':'&gt;', '&':'&amp;' }[c]
                     ))}</pre>`;
                 entriesContainer.appendChild(entryDiv);
-            }
+            });
         }
 
 
@@ -102,6 +103,8 @@
 
             if (response.ok) {
                 fetchEntries();
+                document.getElementById("title").value = "";
+                document.getElementById("content").value = "";
             } else {
                 alert("Error creating entry.");
             }
