@@ -3,43 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Entries</title>
+    <title>Snippets</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        button {
-            margin: 5px;
-        }
-        .entry {
-            margin-bottom: 10px;
-        }
+        body { font-family: sans-serif; padding: 1em; max-width: 600px; margin: auto; }
+        textarea, input { width: 100%; margin: 0.5em 0; }
+        button { margin: 0.5em; }
     </style>
 </head>
 <body>
-    <h1>CRUD Entries</h1>
-
+    <h1>Snippets</h1>
     <div>
-        <h2>Create New Entry</h2>
-        <input type="text" id="title" placeholder="Title">
-        <input type="text" id="content" placeholder="Content">
+        <input type="text" id="title" placeholder="Title" autofocus />
+        <br>
+        <textarea id="content" rows="10"></textarea>
         <button onclick="createEntry()">Create Entry</button>
     </div>
-
-    <div>
-        <h2>Entries</h2>
-        <div id="entries"></div>
-    </div>
+    <div id="entries"></div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         const auth_key = params.get("auth");
         const apiUrl = "https://snippets.edvardsire.workers.dev/";
 
-        if (!auth_key) {
-            alert("Missing auth key in URL!");
-        }
+        if (!auth_key) { alert("Missing auth key in URL!"); }
 
         async function fetchEntries() {
             const response = await fetch(`${apiUrl}?auth=${auth_key}`, { method: 'GET' });
@@ -51,12 +37,51 @@
                 const entry = data[timestamp];
                 const entryDiv = document.createElement('div');
                 entryDiv.classList.add('entry');
+                entryDiv.id = timestamp;
                 entryDiv.innerHTML = `
-                    <strong>${entry.title}</strong>: ${entry.content} <br>
-                    <button onclick="updateEntry(${timestamp}, '${entry.title}', '${entry.content}')">Update</button>
+                    <strong>${entry.title}</strong>
+                    <button onclick="enableEdit(${timestamp})">Update</button>
                     <button onclick="deleteEntry(${timestamp})">Delete</button>
-                `;
+                    <br>
+                    <pre>${entry.content.replace(/[<>&]/g, c => (
+                        { '<':'&lt;', '>':'&gt;', '&':'&amp;' }[c]
+                    ))}</pre>`;
                 entriesContainer.appendChild(entryDiv);
+            }
+        }
+
+        function enableEdit(timestamp) {
+            const entryDiv = document.getElementById(timestamp);
+            const title = entryDiv.querySelector('strong').textContent;
+            const content = entryDiv.querySelector('pre').textContent;
+
+            entryDiv.innerHTML = `
+                <input type="text" value="${title}" id="title-${timestamp}"><br>
+                <textarea id="content-${timestamp}">${content}</textarea><br>
+                <button onclick="confirmUpdate(${timestamp})">Confirm</button>
+                <button onclick="fetchEntries()">Cancel</button>
+            `;
+        }
+
+        async function confirmUpdate(timestamp) {
+            const newTitle = document.getElementById(`title-${timestamp}`).value;
+            const newContent = document.getElementById(`content-${timestamp}`).value;
+
+            if (newTitle && newContent) {
+                const response = await fetch(`${apiUrl}?auth=${auth_key}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': auth_key
+                    },
+                    body: JSON.stringify({ title: newTitle, content: newContent, timestamp, auth: auth_key })
+                });
+
+                if (response.ok) {
+                    fetchEntries();
+                } else {
+                    alert("Error updating entry.");
+                }
             }
         }
 
@@ -77,28 +102,6 @@
                 fetchEntries();
             } else {
                 alert("Error creating entry.");
-            }
-        }
-
-        async function updateEntry(timestamp, oldTitle, oldContent) {
-            const newTitle = prompt("Update title:", oldTitle);
-            const newContent = prompt("Update content:", oldContent);
-
-            if (newTitle && newContent) {
-                const response = await fetch(`${apiUrl}?auth=${auth_key}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': auth_key
-                    },
-                    body: JSON.stringify({ title: newTitle, content: newContent, timestamp, auth: auth_key })
-                });
-
-                if (response.ok) {
-                    fetchEntries();
-                } else {
-                    alert("Error updating entry.");
-                }
             }
         }
 
