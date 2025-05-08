@@ -50,14 +50,16 @@
             }
         }
 
+
         function enableEdit(timestamp) {
             const entryDiv = document.getElementById(timestamp);
             const title = entryDiv.querySelector('strong').textContent;
             const content = entryDiv.querySelector('pre').textContent;
 
+            console.log(countLines(content));
             entryDiv.innerHTML = `
                 <input type="text" value="${title}" id="title-${timestamp}"><br>
-                <textarea id="content-${timestamp}">${content}</textarea><br>
+                <textarea id="content-${timestamp}" rows="${countLines(content)+5}">${content}</textarea><br>
                 <button onclick="confirmUpdate(${timestamp})">Confirm</button>
                 <button onclick="fetchEntries()">Cancel</button>
             `;
@@ -120,6 +122,10 @@
             } else {
                 alert("Error deleting entry.");
             }
+        }
+
+        function countLines(str) {
+            return str.split('\n').length;
         }
 
         fetchEntries();
