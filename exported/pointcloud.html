@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <style>
+      html, body, #container, #mapCanvas {
+        box-sizing: border-box;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #container {
+        position: relative;
+        background-color: black;
+      }
+      #mapCanvas {
+        z-index: 1;
+        touch-action: none;
+      }
+      #menubox {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 2px;
+        box-sizing: border-box;
+      }
+      #log {
+        font-size: 0.6em;
+        max-height: 20em;
+        position: absolute;
+        bottom: 1em;
+        left: 1em;
+        z-index: 2;
+        color: white;
+        pointer-events: none;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <canvas id="mapCanvas" tabindex="0"></canvas>
+      <div id="menubox">
+      </div>
+      <div id="log"></div>
+    </div>
+  </body>
+  <script type="module">
+    import PCDEditor from './pointcloud/pcdeditor.esm.js'
+    const editor = new PCDEditor({
+        wasmPath: './pointcloud/pcdeditor.wasm',
+        wasmExecPath: './pointcloud/wasm_exec.js',
+    })
+    editor.appendDefaultMenuboxTo('#menubox')
+    editor.attach().then(() => {
+        const pcdPath = './pointcloud/outside.pcd'
+        editor.reset().catch(editor.logger)
+        editor.loadPCD(pcdPath).catch(editor.logger)
+    })
+  </script>
+</html>
