@@ -93,9 +93,7 @@
       </p>
       <br />
       <p>
-        curl https://edvardsire.com/get-dotfiles.sh | bash
-	<br />
-        curl https://edvardsire.com/remove-dotfiles.sh | bash
+        sudo ln -sfn $(nix build github:edvardsire/dotfiles#neovim --no-link --print-out-paths)/bin/nvim /usr/local/bin/nvim
       </p>
 	
       </main>
